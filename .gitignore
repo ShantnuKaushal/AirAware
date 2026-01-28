@@ -1,0 +1,33 @@
+# --- .NET & Visual Studio ---
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# --- Node.js & Next.js ---
+node_modules/
+.next/
+out/
+build/
+dist/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+
+# --- Terraform & Cloud ---
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# --- OS ---
+Thumbs.db

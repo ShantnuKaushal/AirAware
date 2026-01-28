@@ -1,0 +1,6 @@
+@AirAware.Weather_HostAddress = http://localhost:5119
+
+GET {{AirAware.Weather_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
