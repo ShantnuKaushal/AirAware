@@ -33,7 +33,7 @@ namespace AirAware.API.Services
             if (string.IsNullOrEmpty(apiKey)) throw new Exception("API Key missing!");
 
             // 2. Build URL
-            var url = $"http://api.aviationstack.com/v1/flights?access_key={apiKey}&limit=20&flight_status=active";
+            var url = $"http://api.aviationstack.com/v1/flights?access_key={apiKey}&limit=10&flight_status=active";
 
             // 3. Call AviationStack
             var response = await _httpClient.GetAsync(url);
