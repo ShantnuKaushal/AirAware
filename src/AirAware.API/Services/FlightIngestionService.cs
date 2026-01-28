@@ -53,8 +53,8 @@ namespace AirAware.API.Services
                     OriginAirport = item.Departure.Iata ?? "Unknown",
                     DestinationAirport = item.Arrival.Iata ?? "Unknown",
                     Status = item.FlightStatus,
-                    DepartureTime = item.Departure.Scheduled,
-                    ArrivalTime = item.Arrival.Estimated
+                    DepartureTime = item.Departure.Scheduled.ToUniversalTime(),
+                    ArrivalTime = item.Arrival.Estimated?.ToUniversalTime()
                 };
 
                 _context.Flights.Add(flight);
