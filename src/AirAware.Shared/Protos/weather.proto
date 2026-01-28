@@ -4,19 +4,16 @@ option csharp_namespace = "AirAware.Shared.Protos";
 
 package weather;
 
-// The Service Definition
 service WeatherProcessor {
-  // The Function we can call
   rpc GetStressScore (WeatherRequest) returns (WeatherReply);
 }
 
-// The Input Message
 message WeatherRequest {
   string airport_code = 1;
   double flight_duration = 2;
+  string location_name = 3; 
 }
 
-// The Output Message
 message WeatherReply {
   int32 stress_score = 1;
   string recommendation = 2;

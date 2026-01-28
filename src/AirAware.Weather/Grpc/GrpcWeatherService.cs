@@ -15,10 +15,9 @@ namespace AirAware.Weather.Grpc
 
         public override async Task<WeatherReply> GetStressScore(WeatherRequest request, ServerCallContext context)
         {
-            // Call existing logic engine
-            var report = await _logicService.AnalyzeConditionsAsync(request.AirportCode, request.FlightDuration);
+            // Passing AirportCode as the flight ID to calculate variance
+            var report = await _logicService.AnalyzeConditionsAsync(request.AirportCode, request.FlightDuration, request.LocationName);
 
-            // Convert the result into a gRPC message
             return new WeatherReply
             {
                 StressScore = report.StressScore,

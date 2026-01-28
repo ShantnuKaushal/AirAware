@@ -1,4 +1,4 @@
-name: AirAware Build Pipeline
+name: AirAware CI Pipeline
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # JOB 1: Test the .NET Backend
-  build-backend:
+  # Job 1: Build the .NET Solution
+  build-dotnet:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -18,30 +18,24 @@ jobs:
       with:
         dotnet-version: 8.0.x
         
-    - name: Restore Dependencies
+    - name: Restore dependencies
       run: dotnet restore ./src/AirAware.sln
       
-    - name: Build Solution
+    - name: Build
       run: dotnet build ./src/AirAware.sln --no-restore --configuration Release
 
-  # JOB 2: Test the Next.js Frontend
-  build-frontend:
+  # Job 2: Build the Docker Images (Ensures deployment will work)
+  build-docker:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/airaware.web
+    needs: build-dotnet
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: './src/airaware.web/package-lock.json'
-        
-    - name: Install Dependencies
-      run: npm ci
-      
-    - name: Build Next.js
-      run: npm run build
+
+    - name: Build API Image
+      run: docker build -t airaware-api -f src/AirAware.API/Dockerfile .
+
+    - name: Build Weather Image
+      run: docker build -t airaware-weather -f src/AirAware.Weather/Dockerfile .
+
+    - name: Build Web Image
+      run: docker build -t airaware-web -f src/airaware.web/Dockerfile .

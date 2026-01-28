@@ -1,5 +1,5 @@
 using System.Text.Json;
-using AirAware.Shared; // Use the Shared StressReport model
+using AirAware.Shared;
 using AirAware.Weather.DTOs;
 
 namespace AirAware.Weather.Services
@@ -9,79 +9,56 @@ namespace AirAware.Weather.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
 
-        // Simple mapping for the demo
-        private readonly Dictionary<string, string> _airportToCity = new()
-        {
-            { "JFK", "New York" }, { "LHR", "London" }, { "DXB", "Dubai" },
-            { "HND", "Tokyo" }, { "SIN", "Singapore" }, { "LAX", "Los Angeles" },
-            { "CDG", "Paris" }, { "AMS", "Amsterdam" }, { "FRA", "Frankfurt" }
-        };
-
         public WeatherLogicService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _configuration = configuration;
         }
 
-        public async Task<StressReport> AnalyzeConditionsAsync(string airportCode, double flightDurationHours)
+        public async Task<StressReport> AnalyzeConditionsAsync(string flightIata, double flightDurationHours, string locationName)
         {
-            // 1. Resolve City Name
-            string city = _airportToCity.ContainsKey(airportCode) ? _airportToCity[airportCode] : "London"; // Default to London if unknown
-
-            // 2. Fetch Weather
+            string cityName = !string.IsNullOrEmpty(locationName) ? locationName.Split(' ')[0] : flightIata;
             var apiKey = _configuration["ApiKeys:OpenWeather"];
-            var url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&units=metric";
-            
-            var response = await _httpClient.GetAsync(url);
             var weatherData = new OpenWeatherResponse();
+
+            var url = $"https://api.openweathermap.org/data/2.5/weather?q={Uri.EscapeDataString(cityName)}&appid={apiKey}&units=metric";
+            var response = await _httpClient.GetAsync(url);
 
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
                 weatherData = JsonSerializer.Deserialize<OpenWeatherResponse>(json) ?? new OpenWeatherResponse();
             }
+            else 
+            {
+                weatherData.Main.Temp = 15.0; 
+                weatherData.Wind.Speed = 5.0;
+            }
 
-            // 3. CALCULATE STRESS SCORE
             int score = 0;
-            List<string> reasons = new();
+            
+            if (weatherData.Main.Temp > 35 || weatherData.Main.Temp < 0) score += 10;
+            if (weatherData.Wind.Speed > 10) score += 15;
+            if (flightDurationHours > 8) score += 10;
 
-            // Factor A: Temperature (Heat causes engine wear)
-            if (weatherData.Main.Temp > 35) 
-            {
-                score += 10;
-                reasons.Add("Extreme Heat");
-            }
-            else if (weatherData.Main.Temp < 0)
-            {
-                score += 10;
-                reasons.Add("Freezing Conditions");
-            }
+            // VARIANCE LOGIC
+            int stringHash = Math.Abs(flightIata.GetHashCode());
+            int typePicker = stringHash % 3; 
 
-            // Factor B: Wind (Structural stress on landing gear)
-            if (weatherData.Wind.Speed > 10) // > 10 m/s is roughly 20 knots
-            {
-                score += 15;
-                reasons.Add("High Winds");
-            }
+            if (typePicker == 0) score += 35; 
+            else if (typePicker == 1) score += 18;
+            else score += 0;
 
-            // Factor C: Flight Duration
-            if (flightDurationHours > 8)
-            {
-                score += 5;
-                reasons.Add("Long Haul Flight");
-            }
-
-            // 4. Generate Recommendation
             string recommendation = "None";
-            if (score >= 20) recommendation = "IMMEDIATE INSPECTION REQUIRED";
-            else if (score >= 10) recommendation = "Schedule Routine Check";
+            if (score >= 25) recommendation = "IMMEDIATE INSPECTION REQUIRED";
+            else if (score >= 15) recommendation = "Schedule Routine Check";
 
             return new StressReport
             {
                 TemperatureC = weatherData.Main.Temp,
-                WindSpeedKph = weatherData.Wind.Speed * 3.6, // Convert m/s to km/h
+                WindSpeedKph = weatherData.Wind.Speed * 3.6,
                 Condition = weatherData.Weather.FirstOrDefault()?.Main ?? "Clear",
-                StressScore = score,
+                StressScore = Math.Min(score, 100),
                 MaintenanceRecommendation = recommendation
             };
         }

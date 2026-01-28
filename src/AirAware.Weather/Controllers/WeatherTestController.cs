@@ -15,9 +15,9 @@ namespace AirAware.Weather.Controllers
         }
 
         [HttpGet("analyze")]
-        public async Task<IActionResult> Analyze(string airportCode = "DXB", double hours = 9)
+        public async Task<IActionResult> Analyze(string airportCode = "DXB", double hours = 9, string locationName = "Dubai International Airport")
         {
-            var report = await _service.AnalyzeConditionsAsync(airportCode, hours);
+            var report = await _service.AnalyzeConditionsAsync(airportCode, hours, locationName);
             return Ok(report);
         }
     }
