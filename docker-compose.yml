@@ -10,14 +10,46 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: always
 
   redis:
     image: redis:alpine
     container_name: airaware-cache
     ports:
       - "6379:6379"
-    restart: always
+
+  weather-service:
+    build:
+      context: .
+      dockerfile: src/AirAware.Weather/Dockerfile
+    environment:
+      - ApiKeys__OpenWeather=${OPEN_WEATHER_KEY}
+      - DOTNET_ENVIRONMENT=Development
+    ports:
+      - "5119:5119"
+      - "5222:5222"
+
+  main-api:
+    build:
+      context: .
+      dockerfile: src/AirAware.API/Dockerfile
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=airaware_db;Username=admin;Password=password
+      - ApiKeys__AviationStack=${AVIATION_STACK_KEY}
+      - DOTNET_ENVIRONMENT=Development
+    depends_on:
+      - postgres
+      - weather-service
+    ports:
+      - "5077:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/airaware.web/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - main-api
 
 volumes:
   postgres_data:
