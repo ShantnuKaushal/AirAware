@@ -20,7 +20,7 @@ builder.Services.AddScoped<AirAware.API.Services.FlightIngestionService>();
 // 4. Register gRPC Client (Connects to Weather Service)
 builder.Services.AddGrpcClient<WeatherProcessor.WeatherProcessorClient>(o =>
 {
-    o.Address = new Uri("http://localhost:5119");
+    o.Address = new Uri("http://localhost:5222");
 });
 
 var app = builder.Build();

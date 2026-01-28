@@ -37,7 +37,11 @@ namespace AirAware.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetFlights()
         {
-            var flights = await _context.Flights.ToListAsync();
+            var flights = await _context.Flights
+                .Include(f => f.StressReport) 
+                .OrderByDescending(f => f.Id) 
+                .ToListAsync();
+                
             return Ok(flights);
         }
     }
