@@ -1,12 +1,20 @@
+using AirAware.Weather.Services;
+using AirAware.Weather.Grpc; 
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+
+// Add gRPC
+builder.Services.AddGrpc(); 
+
+builder.Services.AddHttpClient<WeatherLogicService>();
+builder.Services.AddScoped<WeatherLogicService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -14,5 +22,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
+
+// Turn on the gRPC Endpoint
+app.MapGrpcService<GrpcWeatherService>(); 
 
 app.Run();
