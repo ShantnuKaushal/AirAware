@@ -23,11 +23,5 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 
-# --- Terraform & Cloud ---
-.terraform/
-*.tfstate
-*.tfstate.backup
-*.tfvars
-
 # --- OS ---
 Thumbs.db

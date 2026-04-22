@@ -1,6 +1,5 @@
-@AirAware.Weather_HostAddress = http://localhost:5119
+@AirAwareWeatherHost = http://localhost:5119
 
-GET {{AirAware.Weather_HostAddress}}/weatherforecast/
+### Exercise the weather scoring logic
+GET {{AirAwareWeatherHost}}/api/WeatherTest/analyze?airportCode=DXB&hours=9&locationName=Dubai%20International%20Airport
 Accept: application/json
-
-###

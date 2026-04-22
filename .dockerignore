@@ -1,0 +1,12 @@
+.git
+.github
+.next
+.vs
+.vscode
+node_modules
+**/node_modules
+**/bin
+**/obj
+src/airaware.web/.next
+deploy
+infra

@@ -1,21 +1,20 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: airaware-db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: airaware_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d airaware_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:alpine
-    container_name: airaware-cache
-    ports:
-      - "6379:6379"
 
   weather-service:
     build:
@@ -37,8 +36,10 @@ services:
       - ApiKeys__AviationStack=${AVIATION_STACK_KEY}
       - DOTNET_ENVIRONMENT=Development
     depends_on:
-      - postgres
-      - weather-service
+      postgres:
+        condition: service_healthy
+      weather-service:
+        condition: service_started
     ports:
       - "5077:8080"
 

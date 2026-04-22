@@ -1,6 +1,9 @@
-@AirAware.API_HostAddress = http://localhost:5077
+@AirAwareApiHost = http://localhost:5077
 
-GET {{AirAware.API_HostAddress}}/weatherforecast/
+### Get stored flights
+GET {{AirAwareApiHost}}/api/Flights
 Accept: application/json
 
-###
+### Sync active flights from AviationStack
+POST {{AirAwareApiHost}}/api/Flights/sync
+Accept: application/json
